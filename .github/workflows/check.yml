@@ -19,7 +19,7 @@ jobs:
         with: { node-version: 20 }
       - name: Scrape
         run: |
-          set -e
+          mkdir -p check
           ok=1
           for c in @mauktenieb @3blue1brown; do
             f=check/$(echo $c | tr -d '@').json
