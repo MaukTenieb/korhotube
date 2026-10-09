@@ -58,7 +58,8 @@ function collect(node, out, tokens) {
   if (l && l.contentId && (l.contentType || '').includes('VIDEO')) {
     const m = l.metadata && l.metadata.lockupMetadataViewModel;
     const rows = (m && m.metadata && m.metadata.contentMetadataViewModel && m.metadata.contentMetadataViewModel.metadataRows) || [];
-    out.push({ id: l.contentId, title: m && m.title && m.title.content || '', seconds: null, length: '',
+    const len = (JSON.stringify(l.contentImage || {}).match(/"text":"(\d{1,2}(?::\d{2}){1,2})"/) || [])[1] || '';
+    out.push({ id: l.contentId, title: m && m.title && m.title.content || '', seconds: len ? len.split(':').reduce((a, b) => a * 60 + +b, 0) : null, length: len,
       info: rows.flatMap(r => (r.metadataParts || []).map(x => x.text && x.text.content || '')).filter(Boolean).join(' • ') });
     return;
   }
