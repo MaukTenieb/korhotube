@@ -1,0 +1,20 @@
+name: probe
+on:
+  push:
+    paths: ['tools/probe.mjs', '.github/workflows/probe.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: |
+          mkdir -p check
+          node tools/probe.mjs r-le2_wt3Tk > check/probe.json || true
+          node tools/probe.mjs aircAruvnKk > check/probe2.json || true
+          git config user.name "korhotube-check"; git config user.email "actions@users.noreply.github.com"
+          git add check && git commit -qm "probe" && git pull -q --rebase && git push -q || true
