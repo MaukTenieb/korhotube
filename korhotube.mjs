@@ -135,56 +135,93 @@ function timecodes(desc) {
   }
   return out.length >= 2 ? out : [];
 }
-export async function video(id) {
+const CATS = { 1: 'Film & Animation', 2: 'Autos & Vehicles', 10: 'Music', 15: 'Pets & Animals', 17: 'Sports', 19: 'Travel & Events', 20: 'Gaming', 22: 'People & Blogs', 23: 'Comedy', 24: 'Entertainment', 25: 'News & Politics', 26: 'Howto & Style', 27: 'Education', 28: 'Science & Technology', 29: 'Nonprofits & Activism' };
+const isoDay = t => { const d = new Date(String(t || '').replace(/^(Premiered|Streamed live on|Started streaming on)\s+/i, '') + ' UTC'); return isNaN(d) ? null : d.toISOString().slice(0, 10); };
+async function nextData(id, version) {
+  const r = await fetch('https://www.youtube.com/youtubei/v1/next?prettyPrint=false', { method: 'POST', headers: { ...H, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ context: { client: { clientName: 'WEB', clientVersion: version || '2.20241001.00.00', hl: 'en', gl: 'US' } }, videoId: id }) });
+  if (!r.ok) throw new Error('next: HTTP ' + r.status);
+  return r.json();
+}
+/* One video, in detail. Three sources, each used when it answers:
+   1. InnerTube "next" (answers from anywhere, servers included): title, description, date, views, likes, chapters, hashtags.
+   2. The watch page's player data (answers from home connections; servers get a bot check): tags, category,
+      exact publish and upload dates, audio tracks (dubbing), subtitle tracks, length, countries.
+   3. The YouTube Data API, if a key is given ({ key } or env YT_KEY): tags, category, languages, caption flag.
+   `sources` says which answered; nothing is invented when one is silent. */
+export async function video(id, { key } = {}) {
   if (!/^[\w-]{11}$/.test(id)) throw new Error('not a video id: ' + id);
-  const r = await fetch('https://www.youtube.com/watch?v=' + id + '&hl=en&gl=US&has_verified=1', { headers: H });
-  if (!r.ok) throw new Error('watch page: HTTP ' + r.status);
-  const html = await r.text();
-  const pr = jsonAfter(html, 'ytInitialPlayerResponse = ') || jsonAfter(html, 'ytInitialPlayerResponse=') || {};
-  const id0 = jsonAfter(html, 'ytInitialData = ') || jsonAfter(html, 'ytInitialData=') || {};
-  const vd = pr.videoDetails || {}, mf = (pr.microformat && pr.microformat.playerMicroformatRenderer) || {};
-  const st = pr.playabilityStatus || {};
-  // chapters: YouTube's own markers first
-  let chapters = [];
-  for (const it of find(id0, 'macroMarkersListItemRenderer')) {
-    const t = it.onTap && it.onTap.watchEndpoint && it.onTap.watchEndpoint.startTimeSeconds;
-    if (t != null) chapters.push({ start: t, time: text(it.timeDescription), title: text(it.title) });
+  const v = { id, url: 'https://www.youtube.com/watch?v=' + id, sources: [] };
+  // 1. next
+  try {
+    const n = await nextData(id);
+    const raw = JSON.stringify(n);
+    const pri = find(n, 'videoPrimaryInfoRenderer')[0] || {}, sec = find(n, 'videoSecondaryInfoRenderer')[0] || {};
+    v.title = text(pri.title) || null;
+    const ad = sec.attributedDescription || (find(n, 'attributedDescriptionBodyText')[0]);
+    v.description = (ad && ad.content) || text(sec.description) || '';
+    v.date = isoDay(text(pri.dateText)); v.dateText = text(pri.dateText) || null;
+    const vc = find(n, 'videoViewCountRenderer')[0];
+    const views = vc && (text(vc.originalViewCount) || text(vc.viewCount));
+    v.views = views ? +String(views).replace(/[^\d]/g, '') || null : null;
+    v.likes = ((raw.match(/along with ([\d,.]+) other/) || [])[1] || '').replace(/,/g, '') || null;
+    const owner = find(n, 'videoOwnerRenderer')[0];
+    v.channel = { id: owner && owner.navigationEndpoint && owner.navigationEndpoint.browseEndpoint && owner.navigationEndpoint.browseEndpoint.browseId || null, name: owner ? text(owner.title) : null };
+    let chapters = [];
+    for (const it of find(n, 'macroMarkersListItemRenderer')) {
+      const t = it.onTap && it.onTap.watchEndpoint && it.onTap.watchEndpoint.startTimeSeconds;
+      if (t != null) chapters.push({ start: t, time: text(it.timeDescription), title: text(it.title) });
+    }
+    const seenT = new Set(); chapters = chapters.filter(c => !seenT.has(c.start) && seenT.add(c.start));
+    const fromDesc = timecodes(v.description);
+    v.chapters = chapters.length ? chapters : fromDesc; v.chaptersFrom = chapters.length ? 'youtube' : (fromDesc.length ? 'description' : null);
+    v.hashtags = [...new Set([...(v.description.match(/#[\p{L}\p{N}_]{2,60}/gu) || []), ...find(pri, 'superTitleLink').flatMap(x => (x.runs || []).map(r => r.text.trim())).filter(t => t.startsWith('#'))])];
+    v.sources.push('next');
+  } catch (e) { v.nextError = String(e.message || e); }
+  // 2. watch page player data
+  try {
+    const r = await fetch('https://www.youtube.com/watch?v=' + id + '&hl=en&gl=US&has_verified=1', { headers: H });
+    const html = await r.text();
+    const pr = jsonAfter(html, 'ytInitialPlayerResponse = ') || {};
+    const vd = pr.videoDetails, mf = pr.microformat && pr.microformat.playerMicroformatRenderer;
+    if (vd && vd.videoId) {
+      v.tags = vd.keywords || []; v.seconds = vd.lengthSeconds ? +vd.lengthSeconds : null; v.live = !!vd.isLiveContent;
+      if (!v.description) v.description = vd.shortDescription || '';
+      if (!v.title) v.title = vd.title;
+      if (v.views == null && vd.viewCount) v.views = +vd.viewCount;
+      if (mf) { v.category = mf.category || null; v.published = mf.publishDate || null; v.uploaded = mf.uploadDate || null; v.familySafe = mf.isFamilySafe !== false; v.unlisted = !!mf.isUnlisted; v.countries = mf.availableCountries ? mf.availableCountries.length : null; }
+      const audio = new Map();
+      for (const f of (pr.streamingData && pr.streamingData.adaptiveFormats) || []) { const a = f.audioTrack; if (a && a.id && !audio.has(a.id)) audio.set(a.id, { id: a.id, name: a.displayName, default: !!a.audioIsDefault }); }
+      const capR = (pr.captions && pr.captions.playerCaptionsTracklistRenderer) || {};
+      for (const a of capR.audioTracks || []) if (a.audioTrackId && !audio.has(a.audioTrackId)) audio.set(a.audioTrackId, { id: a.audioTrackId, name: '', default: false });
+      v.audio = [...audio.values()];
+      v.subtitles = (capR.captionTracks || []).map(c => ({ lang: c.languageCode, name: text(c.name), auto: c.kind === 'asr' }));
+      v.sources.push('player');
+    } else v.playerBlocked = (pr.playabilityStatus && pr.playabilityStatus.reason) || 'no player data';
+  } catch (e) { v.playerBlocked = String(e.message || e); }
+  // 3. Data API
+  key = key || (typeof process !== 'undefined' && process.env && process.env.YT_KEY) || '';
+  if (key && !v.sources.includes('player')) {
+    try {
+      const r = await fetch('https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id=' + id + '&key=' + key);
+      const it = ((await r.json()).items || [])[0];
+      if (it) {
+        const sn = it.snippet || {};
+        v.tags = sn.tags || []; v.category = CATS[sn.categoryId] || sn.categoryId || null;
+        v.published = sn.publishedAt || v.published || null; v.language = sn.defaultLanguage || null; v.audioLanguage = sn.defaultAudioLanguage || null;
+        v.captions = (it.contentDetails || {}).caption === 'true';
+        const st = it.statistics || {}; if (v.views == null && st.viewCount) v.views = +st.viewCount; if (!v.likes && st.likeCount) v.likes = st.likeCount;
+        v.sources.push('api');
+      }
+    } catch (e) { v.apiError = String(e.message || e); }
   }
-  if (!chapters.length) for (const c of find(id0, 'chapterRenderer'))
-    chapters.push({ start: Math.round((c.timeRangeStartMillis || 0) / 1000), time: '', title: text(c.title) });
-  const seenT = new Set(); chapters = chapters.filter(c => !seenT.has(c.start) && seenT.add(c.start));
-  const fromDesc = timecodes(vd.shortDescription);
-  // audio tracks (dubbing) and subtitles
-  const audio = new Map();
-  for (const f of (pr.streamingData && pr.streamingData.adaptiveFormats) || []) {
-    const a = f.audioTrack; if (a && a.id && !audio.has(a.id)) audio.set(a.id, { id: a.id, name: a.displayName, default: !!a.audioIsDefault });
-  }
-  const capR = (pr.captions && pr.captions.playerCaptionsTracklistRenderer) || {};
-  for (const a of capR.audioTracks || []) if (a.audioTrackId && !audio.has(a.audioTrackId)) audio.set(a.audioTrackId, { id: a.audioTrackId, name: '', default: false });
-  const subtitles = (capR.captionTracks || []).map(c => ({ lang: c.languageCode, name: text(c.name), auto: c.kind === 'asr' }));
-  // likes and hashtags, from the page data
-  const raw = JSON.stringify(id0);
-  const like = (raw.match(/along with ([\d,.]+) other/) || raw.match(/"([\d,.]+[KM]?) likes"/) || [])[1];
-  const hashtags = [...new Set((raw.match(/"text":"(#[^"#\s]{2,60})"/g) || []).map(x => x.slice(8, -1)))].slice(0, 30);
-  return {
-    id, url: 'https://www.youtube.com/watch?v=' + id, status: st.status || 'OK',
-    title: vd.title || text(mf.title), channel: { id: vd.channelId || mf.externalChannelId, name: vd.author || mf.ownerChannelName },
-    description: vd.shortDescription || text(mf.description),
-    tags: vd.keywords || [], hashtags, category: mf.category || null,
-    published: mf.publishDate || null, uploaded: mf.uploadDate || null,
-    seconds: vd.lengthSeconds ? +vd.lengthSeconds : null, views: vd.viewCount ? +vd.viewCount : null,
-    likes: like ? like.replace(/,/g, '') : null,
-    live: !!vd.isLiveContent, familySafe: mf.isFamilySafe !== false, unlisted: !!mf.isUnlisted,
-    countries: mf.availableCountries ? mf.availableCountries.length : null,
-    chapters: chapters.length ? chapters : fromDesc, chaptersFrom: chapters.length ? 'youtube' : (fromDesc.length ? 'description' : null),
-    audio: [...audio.values()], subtitles,
-    thumbnails: ((vd.thumbnail && vd.thumbnail.thumbnails) || []).map(t => t.url)
-  };
+  if (!v.published && v.date) v.published = v.date;
+  return v;
 }
 /* details for many videos, a few at a time */
-export async function videos(ids, { concurrency = 4, onEach } = {}) {
+export async function videos(ids, { concurrency = 4, onEach, key } = {}) {
   const out = new Array(ids.length); let i = 0;
-  async function worker() { while (i < ids.length) { const k = i++; try { out[k] = await video(ids[k]); } catch (e) { out[k] = { id: ids[k], error: String(e.message || e) }; } if (onEach) onEach(k, out[k]); } }
+  async function worker() { while (i < ids.length) { const k = i++; try { out[k] = await video(ids[k], { key }); } catch (e) { out[k] = { id: ids[k], error: String(e.message || e) }; } if (onEach) onEach(k, out[k]); } }
   await Promise.all(Array.from({ length: Math.min(concurrency, ids.length) }, worker));
   return out;
 }
@@ -203,7 +240,7 @@ export default {
     const u = new URL(req.url), q = u.searchParams.get('channel'), vq = u.searchParams.get('video');
     if (vq) {
       const ids = vq.split(',').filter(x => /^[\w-]{11}$/.test(x)).slice(0, 40);
-      const data = ids.length === 1 ? await video(ids[0]).catch(e => ({ id: ids[0], error: String(e.message || e) })) : await videos(ids);
+      const data = ids.length === 1 ? await video(ids[0], { key: env && env.YT_KEY }).catch(e => ({ id: ids[0], error: String(e.message || e) })) : await videos(ids, { key: env && env.YT_KEY });
       return new Response(JSON.stringify(data), { headers: { ...cors, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=3600' } });
     }
     if (!q) return new Response('{"usage":"?channel=@handle&limit=500 or ?video=ID,ID"}', { status: 400, headers: { ...cors, 'Content-Type': 'application/json' } });

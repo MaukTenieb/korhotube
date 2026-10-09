@@ -18,22 +18,21 @@ node cli.mjs dQw4w9WgXcQ                  # one video in detail
 
 ## Details per video
 
-From the watch page (`ytInitialPlayerResponse`, `ytInitialData`):
+Three sources, each used when it answers; `sources` in the output says which did, and nothing is filled in when one is silent.
 
-| Field | Source |
-|---|---|
-| `description`, `tags`, `seconds`, `views`, `live` | `videoDetails` |
-| `published`, `uploaded`, `category`, `familySafe`, `unlisted`, `countries` | `microformat` |
-| `chapters` | YouTube's chapter markers; otherwise the timecodes written in the description (`chaptersFrom` says which) |
-| `audio` | audio tracks: one per language when the video is dubbed (`id`, `name`, `default`) |
-| `subtitles` | subtitle tracks (`lang`, `name`, `auto` for automatic captions) |
-| `likes`, `hashtags` | page data |
+| Source | Answers from | Gives |
+|---|---|---|
+| InnerTube `next` | anywhere, servers included | `title`, `description`, `date`, `views`, `likes`, `chapters` (YouTube's markers, else the timecodes written in the description; `chaptersFrom` says which), `hashtags`, `channel` |
+| The watch page's player data | home connections (servers get YouTube's bot check: `playerBlocked`) | `tags`, `category`, exact `published` and `uploaded` dates, `audio` (dubbing: one track per language), `subtitles`, `seconds`, `countries` |
+| YouTube Data API (optional key: `YT_KEY`) | anywhere | `tags`, `category`, `language`, `audioLanguage`, `captions` (yes/no) |
+
+So: on your own computer, `node cli.mjs @handle --details` gets everything. On a server or in the Worker, the player data is refused; add a free Data API key (`YT_KEY`) to get tags and category back. Audio tracks and subtitle lists only come from the player data.
 
 ## Cloudflare Worker (free plan)
 
 1. dash.cloudflare.com → Workers & Pages → Create → Worker → Deploy, then Edit code.
 2. Paste `korhotube.mjs` in place of the sample, then Deploy.
-3. Optional: Settings → Variables → `ALLOWED_ORIGINS` = `https://you.github.io` (comma-separated), so only your sites spend your quota.
+3. Optional: Settings → Variables → `ALLOWED_ORIGINS` = `https://you.github.io` (comma-separated), so only your sites spend your quota; `YT_KEY` = a YouTube Data API key, for tags and category.
 
 ```
 GET https://korhotube.<you>.workers.dev/?channel=@handle&limit=500

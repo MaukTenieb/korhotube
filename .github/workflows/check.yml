@@ -31,7 +31,8 @@ jobs:
             cat $f
           done
           if node cli.mjs @mauktenieb --limit 3 --details > /tmp/d.json 2>/tmp/err.txt; then
-            node -e "const d=require('/tmp/d.json');require('fs').writeFileSync('check/details.json',JSON.stringify(d.videos.map(v=>({id:v.id,title:v.title,published:v.published,category:v.category,tags:(v.tags||[]).length,chapters:(v.chapters||[]).length,chaptersFrom:v.chaptersFrom,audio:v.audio,subtitles:(v.subtitles||[]).map(s=>s.lang),views:v.views,likes:v.likes,error:v.error})),null,2));if(!d.videos.every(v=>v.published&&v.description!==undefined))process.exit(1)" || ok=0
+            node -e "const d=require('/tmp/d.json');require('fs').writeFileSync('check/details.json',JSON.stringify(d.videos.map(v=>({id:v.id,title:v.title,published:v.published,views:v.views,likes:v.likes,description:(v.description||'').length,chapters:(v.chapters||[]).length,chaptersFrom:v.chaptersFrom,hashtags:v.hashtags,tags:v.tags&&v.tags.length,category:v.category,audio:v.audio,subtitles:v.subtitles&&v.subtitles.map(s=>s.lang),sources:v.sources,playerBlocked:v.playerBlocked,error:v.error||v.nextError})),null,2));if(!d.videos.every(v=>v.title&&v.published))process.exit(1)" || ok=0
+          node cli.mjs aircAruvnKk > check/video-with-chapters.json 2>/dev/null || ok=0
           else ok=0; fi
           cat check/details.json || true
           git config user.name "korhotube-check"; git config user.email "actions@users.noreply.github.com"

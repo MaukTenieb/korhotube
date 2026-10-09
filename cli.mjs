@@ -5,10 +5,10 @@ import { channel, video, videos } from './korhotube.mjs';
 const a = process.argv.slice(2), who = a.find(x => !x.startsWith('--'));
 if (!who) { console.error('usage: node cli.mjs @handle|channel-url|UC… [--limit N] [--details] [--csv]   |   node cli.mjs VIDEO_ID'); process.exit(2); }
 const li = a.indexOf('--limit'), limit = li >= 0 ? +a[li + 1] : 5000;
-if (/^[\w-]{11}$/.test(who) && !who.startsWith('@') && !who.startsWith('UC')) { console.log(JSON.stringify(await video(who), null, 2)); process.exit(0); }
+if (/^[\w-]{11}$/.test(who) && !who.startsWith('@') && !who.startsWith('UC')) { console.log(JSON.stringify(await video(who, { key: process.env.YT_KEY }), null, 2)); process.exit(0); }
 const d = await channel(who, { limit });
 if (a.includes('--details')) {
-  const det = await videos(d.videos.map(v => v.id), { onEach: k => process.stderr.write(`\r${k + 1}/${d.count}`) });
+  const det = await videos(d.videos.map(v => v.id), { key: process.env.YT_KEY, onEach: k => process.stderr.write(`\r${k + 1}/${d.count}`) });
   process.stderr.write('\n');
   d.videos = d.videos.map((v, k) => ({ ...v, ...det[k], published: det[k] && det[k].published || v.published }));
 }
