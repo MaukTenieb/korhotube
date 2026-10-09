@@ -1,0 +1,93 @@
+{
+  "watch": {
+    "status": 200,
+    "len": 1534292,
+    "player": true,
+    "data": true,
+    "consent": false,
+    "bot": true,
+    "visitor": "yes",
+    "title": " - YouTube"
+  },
+  "WEB": {
+    "http": 200,
+    "play": "LOGIN_REQUIRED",
+    "reason": "Sign in to confirm you’re not a bot",
+    "keywords": 0,
+    "desc": 0,
+    "micro": false,
+    "caps": 0,
+    "formats": 0,
+    "audioTracks": []
+  },
+  "MWEB": {
+    "http": 200,
+    "play": "LOGIN_REQUIRED",
+    "reason": "Sign in to confirm you’re not a bot",
+    "keywords": 0,
+    "desc": 0,
+    "micro": false,
+    "caps": 0,
+    "formats": 0,
+    "audioTracks": []
+  },
+  "WEB_EMBEDDED_PLAYER": {
+    "http": 200,
+    "play": "ERROR",
+    "reason": "This video is unavailable",
+    "keywords": 0,
+    "desc": 0,
+    "micro": false,
+    "caps": 0,
+    "formats": 0,
+    "audioTracks": []
+  },
+  "TVHTML5_SIMPLY_EMBEDDED_PLAYER": {
+    "http": 200,
+    "play": "ERROR",
+    "reason": "YouTube is no longer supported in this application or device.",
+    "keywords": 0,
+    "desc": 0,
+    "micro": false,
+    "caps": 0,
+    "formats": 0,
+    "audioTracks": []
+  },
+  "ANDROID_VR": {
+    "http": 200,
+    "play": "LOGIN_REQUIRED",
+    "reason": "Sign in to confirm you’re not a bot",
+    "keywords": 0,
+    "desc": 0,
+    "micro": false,
+    "caps": 0,
+    "formats": 0,
+    "audioTracks": []
+  },
+  "IOS": {
+    "http": 400,
+    "keywords": 0,
+    "desc": 0,
+    "micro": false,
+    "caps": 0,
+    "formats": 0,
+    "audioTracks": []
+  },
+  "ANDROID": {
+    "http": 400,
+    "keywords": 0,
+    "desc": 0,
+    "micro": false,
+    "caps": 0,
+    "formats": 0,
+    "audioTracks": []
+  },
+  "next": {
+    "http": 200,
+    "len": 661528,
+    "chapters": 25,
+    "desc": true,
+    "likes": "565,330",
+    "date": "Oct 5, 2017"
+  }
+}
