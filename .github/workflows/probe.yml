@@ -18,4 +18,4 @@ jobs:
           node tools/probe.mjs aircAruvnKk > check/probe2.json || true
           node tools/probe2.mjs aircAruvnKk > check/probe3.json || true
           git config user.name "korhotube-check"; git config user.email "actions@users.noreply.github.com"
-          git add check && git commit -qm "probe" && git pull -q --rebase && git push -q || true
+          git add check && git commit -qm "probe [skip ci]" && git pull -q --rebase && git push -q || true

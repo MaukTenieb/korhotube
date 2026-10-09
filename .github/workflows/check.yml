@@ -36,5 +36,5 @@ jobs:
           else ok=0; fi
           cat check/details.json || true
           git config user.name "korhotube-check"; git config user.email "actions@users.noreply.github.com"
-          git add check && git commit -qm "check: $(date -u +%F)" && git push -q || true
+          git add check && git commit -qm "check: $(date -u +%F) [skip ci]" && git push -q || true
           [ $ok = 1 ]
