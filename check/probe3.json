@@ -1,0 +1,42 @@
+{
+ "metas": [
+  [
+   "apple-itunes-app",
+   "app-id=544007664, app-argument=https://www.youtube.com/watch?v=aircAruvnKk&amp;hl=en&amp;referring_app=com.apple.mobiles"
+  ],
+  [
+   "theme-color",
+   "rgba(255, 255, 255, 0.98)"
+  ],
+  [
+   "title",
+   ""
+  ],
+  [
+   "description",
+   "Enjoy the videos and music you love, upload original content, and share it all with friends, family, and the world on Yo"
+  ],
+  [
+   "keywords",
+   "video, sharing, camera phone, video phone, free, upload"
+  ]
+ ],
+ "has \"keywords\":[": false,
+ "has \"category\":\"": false,
+ "has \"publishDate\":\"": false,
+ "has \"uploadDate\":\"": false,
+ "has \"audioTrack\"": false,
+ "has \"captionTracks\"": false,
+ "has \"lengthSeconds\":\"": false,
+ "has \"viewCount\":\"": false,
+ "has \"shortDescription\":\"": false,
+ "www.youtube.com timedtext": {
+  "http": 200,
+  "body": ""
+ },
+ "video.google.com timedtext": {
+  "http": 200,
+  "body": ""
+ },
+ "oembed": 200
+}
