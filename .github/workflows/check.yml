@@ -1,0 +1,39 @@
+# Runs KorhoTube against real channels every day and on each push, and records the result in check/
+# (GitHub's runners reach YouTube; if YouTube changes its pages, this turns red).
+name: check
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['check/**']
+  schedule:
+    - cron: '41 5 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Scrape
+        run: |
+          set -e
+          ok=1
+          for c in @mauktenieb @3blue1brown; do
+            f=check/$(echo $c | tr -d '@').json
+            if node cli.mjs "$c" > /tmp/out.json 2> /tmp/err.txt; then
+              node -e "const d=require('/tmp/out.json');const s={channel:d.channel,count:d.count,fetched:d.fetched,withDates:d.videos.filter(v=>v.published).length,first:d.videos.slice(0,3).map(v=>v.title),last:d.videos.slice(-2).map(v=>v.title)};require('fs').writeFileSync('$f',JSON.stringify(s,null,2));if(d.count<20)process.exit(1)" || ok=0
+            else
+              echo "{\"error\": $(node -e "console.log(JSON.stringify(require('fs').readFileSync('/tmp/err.txt','utf8').slice(-400)))")}" > $f; ok=0
+            fi
+            cat $f
+          done
+          if node cli.mjs @mauktenieb --limit 3 --details > /tmp/d.json 2>/tmp/err.txt; then
+            node -e "const d=require('/tmp/d.json');require('fs').writeFileSync('check/details.json',JSON.stringify(d.videos.map(v=>({id:v.id,title:v.title,published:v.published,category:v.category,tags:(v.tags||[]).length,chapters:(v.chapters||[]).length,chaptersFrom:v.chaptersFrom,audio:v.audio,subtitles:(v.subtitles||[]).map(s=>s.lang),views:v.views,likes:v.likes,error:v.error})),null,2));if(!d.videos.every(v=>v.published&&v.description!==undefined))process.exit(1)" || ok=0
+          else ok=0; fi
+          cat check/details.json || true
+          git config user.name "korhotube-check"; git config user.email "actions@users.noreply.github.com"
+          git add check && git commit -qm "check: $(date -u +%F)" && git push -q || true
+          [ $ok = 1 ]
