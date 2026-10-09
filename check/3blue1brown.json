@@ -1,0 +1,20 @@
+{
+  "channel": {
+    "id": "UCYO_jab_esuFRV4b17AJtAw",
+    "name": "3Blue1Brown",
+    "handle": "@3blue1brown",
+    "url": "https://www.youtube.com/channel/UCYO_jab_esuFRV4b17AJtAw"
+  },
+  "count": 245,
+  "fetched": "2026-10-09T22:56:14.262Z",
+  "withDates": 15,
+  "first": [
+    "The Phone Number puzzle",
+    "The last IMO problem AI could not solve",
+    "The last IMO problem AI could not solve"
+  ],
+  "last": [
+    "Euler's Formula Poem",
+    "e to the pi i, a nontraditional take (old version)"
+  ]
+}
