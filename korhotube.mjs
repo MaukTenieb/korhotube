@@ -239,6 +239,15 @@ export default {
     if (req.method === 'OPTIONS') return new Response(null, { headers: { ...cors, 'Access-Control-Allow-Methods': 'GET' } });
     if (origin && !ok) return new Response('{"error":"origin not allowed"}', { status: 403, headers: { ...cors, 'Content-Type': 'application/json' } });
     const u = new URL(req.url), q = u.searchParams.get('channel'), vq = u.searchParams.get('video');
+    /* ?bio=URL — relay for the author's own public profiles only (Substack, X, Instagram refuse the
+       data-centre addresses the Bio watch runs from); any other address is refused */
+    const bio = u.searchParams.get('bio');
+    if (bio) {
+      const BIO = /^https:\/\/((korhogo|mauktenieb)\.substack\.com\/(about|feed|api\/v1\/(homepage_data|archive)[^\s]*)|substack\.com\/(@mauktenieb|api\/v1\/user\/mauktenieb\/public_profile)|syndication\.twitter\.com\/srv\/timeline-profile\/screen-name\/mauktenieb|(www\.)?instagram\.com\/api\/v1\/users\/web_profile_info\/\?username=(mauktenieb|route6166|gorbuzsadr|mauktenieb2|mauktenieb3))$/;
+      if (!BIO.test(bio)) return new Response('{"error":"not one of the author\'s profiles"}', { status: 403, headers: { ...cors, 'Content-Type': 'application/json' } });
+      const r = await fetch(bio, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36', 'Accept': '*/*', 'Accept-Language': 'en,fr;q=.8', 'x-ig-app-id': '936619743392459' } });
+      return new Response(r.body, { status: r.status, headers: { ...cors, 'Content-Type': r.headers.get('Content-Type') || 'text/plain', 'Cache-Control': 'public, max-age=3600' } });
+    }
     if (vq) {
       const ids = vq.split(',').filter(x => /^[\w-]{11}$/.test(x)).slice(0, 40);
       const data = ids.length === 1 ? await video(ids[0], { key: env && env.YT_KEY }).catch(e => ({ id: ids[0], error: String(e.message || e) })) : await videos(ids, { key: env && env.YT_KEY });
