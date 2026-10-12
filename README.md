@@ -1,8 +1,8 @@
 # KorhoTube
 
-All the videos of a YouTube channel, as JSON, with every detail: tags, hashtags, chapters (timecodes), dubbing (audio tracks), subtitles, exact dates, views, likes, category. No API key, no third-party relay.
+KorhoTube lists the videos of a YouTube channel as JSON, with tags, hashtags, chapters, audio tracks, subtitles, dates, views, likes and category. KorhoTube queries YouTube's InnerTube endpoint directly.
 
-KorhoTube asks YouTube the way youtube.com itself does: the InnerTube `browse` endpoint, page after page, through the channel's uploads playlist until it ends. The RSS feed only gives the latest 15; KorhoTube gives all of them. Exact publication dates come from the RSS feed for those 15; older videos keep YouTube's relative date (`3 years ago`).
+KorhoTube asks YouTube the way youtube.com itself does: the InnerTube `browse` endpoint, page after page, through the channel's uploads playlist until it ends. The RSS feed lists the latest 15 videos; KorhoTube pages through the uploads playlist to its end. Exact publication dates come from the RSS feed for those 15; older videos keep YouTube's relative date (`3 years ago`).
 
 One file, `korhotube.mjs`, runs in two places:
 
@@ -26,7 +26,7 @@ Three sources, each used when it answers; `sources` in the output says which did
 | The watch page's player data | home connections (servers get YouTube's bot check: `playerBlocked`) | `tags`, `category`, exact `published` and `uploaded` dates, `audio` (dubbing: one track per language), `subtitles`, `seconds`, `countries` |
 | YouTube Data API (optional key: `YT_KEY`) | anywhere | `tags`, `category`, `language`, `audioLanguage`, `captions` (yes/no) |
 
-So: on your own computer, `node cli.mjs @handle --details` gets everything. On a server or in the Worker, the player data is refused; add a free Data API key (`YT_KEY`) to get tags and category back. Audio tracks and subtitle lists only come from the player data.
+On a home computer, `node cli.mjs @handle --details` reads InnerTube and the player data, and the Data API when `YT_KEY` holds a key. On a server or in the Worker, the player data is refused; add a free Data API key (`YT_KEY`) to get tags and category back. Audio tracks and subtitle lists only come from the player data.
 
 ## Cloudflare Worker (free plan)
 
@@ -70,11 +70,11 @@ Answers carry CORS headers, so a web page can call the Worker directly; they are
 <!-- network:start -->
 ## Provenance
 
-Built for [Insert Koin](https://mauktenieb.github.io/insertkoin/), the browser arcade of the Korhogo Fauna: it feeds its VHS deck.
+Built for [Insert Koin](https://mauktenieb.github.io/insertkoin/), Mauk Tenieb's browser games set in Korhogo: it feeds its VHS deck.
 
-Other tools by Mauk Tenieb: [Detour](https://github.com/MaukTenieb/detour): portraits to sprite strips, then their catchlights · [FaunaTor](https://github.com/MaukTenieb/faunator): Tor inside a web page · [Reporhogo](https://github.com/MaukTenieb/reporhogo): searches forty-one code forges for a topic · [Photofauna](https://github.com/MaukTenieb/Photofauna): the pocket photo emulator · [TorView](https://github.com/MaukTenieb/torview): a minimal Tor browser, Go.
+Other tools by Mauk Tenieb: [Detour](https://github.com/MaukTenieb/detour): cuts portrait sheets into sprite strips and places the eye lights · [FaunaTor](https://github.com/MaukTenieb/faunator): reads web and .onion pages through Tor clients that run in the page · [Reporhogo](https://github.com/MaukTenieb/reporhogo): searches forty-one code forges for a topic and lists the repositories it finds · [Photofauna](https://github.com/MaukTenieb/Photofauna): a photo editor with 44 looks, part of Insert Koin · [TorView](https://github.com/MaukTenieb/torview): a desktop browser in Go that routes its traffic through the official Tor daemon.
 
-Start here: https://mauktenieb.github.io/
+Index of Mauk Tenieb's sites: https://mauktenieb.github.io/
 <!-- network:end -->
 
 ## License
