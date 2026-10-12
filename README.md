@@ -72,7 +72,7 @@ Answers carry CORS headers, so a web page can call the Worker directly; they are
 
 Built for [Insert Koin](https://mauktenieb.github.io/insertkoin/), the browser arcade of the Korhogo Fauna: it feeds its VHS deck.
 
-Other tools by Mauk Tenieb: [Detour](https://github.com/MaukTenieb/detour): portraits to sprite strips, then their catchlights · [FaunaTor](https://github.com/MaukTenieb/faunator): Tor inside a web page · [Reporhogo](https://github.com/MaukTenieb/reporhogo): one topic, forty-one code forges · [Photofauna](https://github.com/MaukTenieb/Photofauna): the pocket photo emulator · [TorView](https://github.com/MaukTenieb/torview): a minimal Tor browser, Go.
+Other tools by Mauk Tenieb: [Detour](https://github.com/MaukTenieb/detour): portraits to sprite strips, then their catchlights · [FaunaTor](https://github.com/MaukTenieb/faunator): Tor inside a web page · [Reporhogo](https://github.com/MaukTenieb/reporhogo): searches forty-one code forges for a topic · [Photofauna](https://github.com/MaukTenieb/Photofauna): the pocket photo emulator · [TorView](https://github.com/MaukTenieb/torview): a minimal Tor browser, Go.
 
 Start here: https://mauktenieb.github.io/
 <!-- network:end -->
