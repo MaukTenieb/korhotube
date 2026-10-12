@@ -70,7 +70,7 @@ Answers carry CORS headers, so a web page can call the Worker directly; they are
 <!-- network:start -->
 ## Provenance
 
-Built for [Insert Koin](https://mauktenieb.github.io/insertkoin/), the games and machines of Korhogo in the browser: it feeds its VHS deck.
+Built for [Insert Koin](https://mauktenieb.github.io/insertkoin/), Mauk Tenieb's Korhogo world, games and machines in a browser: it feeds its VHS deck.
 
 Other tools by Mauk Tenieb: [Detour](https://github.com/MaukTenieb/detour): cuts portrait sheets into sprite strips and places the eye lights · [FaunaTor](https://github.com/MaukTenieb/faunator): reads web and .onion pages through Tor clients that run in the page · [Reporhogo](https://github.com/MaukTenieb/reporhogo): searches forty-one code forges for a topic and lists the repositories it finds · [Photofauna](https://github.com/MaukTenieb/Photofauna): a photo editor with 44 looks, part of Insert Koin · [TorView](https://github.com/MaukTenieb/torview): a desktop browser in Go that routes its traffic through the official Tor daemon.
 
