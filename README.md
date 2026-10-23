@@ -1,10 +1,12 @@
 # KorhoTube
 
-KorhoTube lists the videos of a YouTube channel as JSON, with tags, hashtags, chapters, audio tracks, subtitles, dates, views, likes and category. KorhoTube queries YouTube's InnerTube endpoint directly.
+By Mauk Tenieb & Korhogo. Build guide: [MaukTenieb/method](https://github.com/MaukTenieb/method).
 
-KorhoTube asks YouTube the way youtube.com itself does: the InnerTube `browse` endpoint, page after page, through the channel's uploads playlist until it ends. The RSS feed lists the latest 15 videos; KorhoTube pages through the uploads playlist to its end. Exact publication dates come from the RSS feed for those 15; older videos keep YouTube's relative date (`3 years ago`).
+KorhoTube lists the videos of a YouTube channel as JSON, with tags, hashtags, chapters, audio tracks, subtitles, dates, views, likes, category.
 
-One file, `korhotube.mjs`, runs in two places:
+KorhoTube asks YouTube the way youtube.com itself does: it calls the InnerTube `browse` endpoint, page after page, through the channel's uploads playlist to its end. The RSS feed lists the latest 15 videos and gives their exact publication dates. Older videos keep YouTube's relative date (`3 years ago`).
+
+One file, `korhotube.mjs`, runs in two places: on the command line and as a Cloudflare Worker.
 
 ## Command line (Node 18+)
 
@@ -18,15 +20,15 @@ node cli.mjs dQw4w9WgXcQ                  # one video in detail
 
 ## Details per video
 
-Three sources, each used when it answers; `sources` in the output says which did, and nothing is filled in when one is silent.
+KorhoTube reads three sources and uses each one when it answers. `sources` in the output names the sources that answered. KorhoTube fills a field only from a source that answers.
 
 | Source | Answers from | Gives |
 |---|---|---|
-| InnerTube `next` | anywhere, servers included | `title`, `description`, `date`, `views`, `likes`, `chapters` (YouTube's markers, else the timecodes written in the description; `chaptersFrom` says which), `hashtags`, `channel` |
+| InnerTube `next` | anywhere, servers included | `title`, `description`, `date`, `views`, `likes`, `chapters` (YouTube's markers, else the timecodes written in the description; `chaptersFrom` names the origin), `hashtags`, `channel` |
 | The watch page's player data | home connections (servers get YouTube's bot check: `playerBlocked`) | `tags`, `category`, exact `published` and `uploaded` dates, `audio` (dubbing: one track per language), `subtitles`, `seconds`, `countries` |
-| YouTube Data API (optional key: `YT_KEY`) | anywhere | `tags`, `category`, `language`, `audioLanguage`, `captions` (yes/no) |
+| YouTube Data API (optional key: `YT_KEY`) | anywhere | `tags`, `category`, `language`, `audioLanguage`, `captions` (true/false) |
 
-On a home computer, `node cli.mjs @handle --details` reads InnerTube and the player data, and the Data API when `YT_KEY` holds a key. On a server or in the Worker, the player data is refused; add a free Data API key (`YT_KEY`) to get tags and category back. Audio tracks and subtitle lists only come from the player data.
+KorhoTube asks the Data API when the player data stays out of reach and `YT_KEY` contains a key. On a home computer, `node cli.mjs @handle --details` reads InnerTube and the player data. On a server or in the Worker, YouTube refuses the player data; add a free Data API key (`YT_KEY`) to get tags and category back. Audio tracks and subtitle lists come from the player data alone.
 
 ## Cloudflare Worker (free plan)
 
@@ -39,9 +41,9 @@ GET https://korhotube.<you>.workers.dev/?channel=@handle&limit=500
 GET https://korhotube.<you>.workers.dev/?video=ID,ID,ID        (40 at most per call)
 ```
 
-The free plan allows 50 outgoing requests per call: list the channel first, then ask for details in batches of 40.
+The free plan allows 50 outgoing requests per call. List the channel first, then ask for details in batches of 40.
 
-Answers carry CORS headers, so a web page can call the Worker directly; they are cached at the edge for an hour.
+The Worker sends CORS headers with each answer, so a web page can call it directly. Cloudflare caches the answers at the edge for an hour.
 
 ## Output
 
@@ -57,15 +59,15 @@ Answers carry CORS headers, so a web page can call the Worker directly; they are
 }
 ```
 
-## Is it still working?
+## Daily check
 
-`.github/workflows/check.yml` runs KorhoTube against real channels every day and writes the result to `check/`. If YouTube changes its pages, the check turns red.
+`.github/workflows/check.yml` runs KorhoTube against real channels every day and on each push, and writes the result to `check/`. When YouTube changes its pages, the check turns red.
 
 ## Limits
 
-- Public videos only: no members-only, private or unlisted videos.
-- YouTube can change its internal format at any time; the parser looks for any video-like object rather than one fixed path, which absorbs most changes.
-- Respect YouTube's terms of service and the creators' rights. KorhoTube lists videos; it does not download them.
+- KorhoTube lists public videos only; members-only, private or unlisted videos stay out.
+- YouTube changes its internal format from time to time. The parser looks for every video-like object, whatever the renderer, and so copes with most changes.
+- Respect YouTube's terms of service and the creators' rights. KorhoTube lists videos and their metadata, and downloads zero video files.
 
 <!-- network:start -->
 ## Provenance
@@ -77,6 +79,8 @@ Other tools by Mauk Tenieb: [Detour](https://github.com/MaukTenieb/detour): cuts
 Index of Mauk Tenieb's sites: https://mauktenieb.github.io/
 <!-- network:end -->
 
-## License
+Related: [mauktenieb.github.io](https://mauktenieb.github.io/) · [MaukTenieb/method](https://github.com/MaukTenieb/method)
 
-MIT. Made for the VHS deck of [Insert Koin](https://mauktenieb.github.io/insertkoin/).
+## Rights
+
+Code under MIT, method under CC BY 4.0, Korhogo material reserved; credit Mauk Tenieb & Korhogo. Details: [LICENSE](LICENSE).
