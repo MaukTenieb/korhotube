@@ -5,13 +5,13 @@
     "handle": "@3blue1brown",
     "url": "https://www.youtube.com/channel/UCYO_jab_esuFRV4b17AJtAw"
   },
-  "count": 247,
-  "fetched": "2026-11-17T14:50:59.570Z",
+  "count": 249,
+  "fetched": "2026-11-18T14:30:03.522Z",
   "withDates": 15,
   "first": [
-    "The Sphere Intersection Puzzle",
-    "There's never been a better time to go into math",
-    "The Phone Number puzzle"
+    "How to compress text to 1 bit per character | Information theory, part 3",
+    "Encoding the encyclopedia on a rod",
+    "The Sphere Intersection Puzzle"
   ],
   "last": [
     "Euler's Formula Poem",
