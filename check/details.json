@@ -2,46 +2,31 @@
   {
     "id": "r-le2_wt3Tk",
     "title": "Ts'ui Pên - Marxist South Yemen",
-    "published": "2026-08-10",
-    "views": 61,
-    "likes": null,
-    "description": 3087,
+    "published": "2026-08-10T11:25:40+00:00",
+    "description": 0,
     "chapters": 0,
-    "chaptersFrom": null,
-    "hashtags": [],
-    "sources": [
-      "next"
-    ],
-    "playerBlocked": "Sign in to confirm you’re not a bot"
+    "sources": [],
+    "playerBlocked": "Sign in to confirm you’re not a bot",
+    "error": "next: HTTP 403"
   },
   {
     "id": "bdq1AKfS4ME",
     "title": "Mauk Tenieb - Violet",
-    "published": "2026-08-05",
-    "views": 58,
-    "likes": "3",
-    "description": 2906,
+    "published": "2026-08-05T19:19:01+00:00",
+    "description": 0,
     "chapters": 0,
-    "chaptersFrom": null,
-    "hashtags": [],
-    "sources": [
-      "next"
-    ],
-    "playerBlocked": "Sign in to confirm you’re not a bot"
+    "sources": [],
+    "playerBlocked": "Sign in to confirm you’re not a bot",
+    "error": "next: HTTP 403"
   },
   {
     "id": "jgLJfLUmfR4",
     "title": "C7H5N3O6 - By all means",
-    "published": "2026-05-21",
-    "views": 22,
-    "likes": null,
-    "description": 3064,
+    "published": "2026-05-21T20:48:18+00:00",
+    "description": 0,
     "chapters": 0,
-    "chaptersFrom": null,
-    "hashtags": [],
-    "sources": [
-      "next"
-    ],
-    "playerBlocked": "Sign in to confirm you’re not a bot"
+    "sources": [],
+    "playerBlocked": "Sign in to confirm you’re not a bot",
+    "error": "next: HTTP 403"
   }
 ]
